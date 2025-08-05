@@ -1,1 +1,1702 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Julien - Expert FAP Re-Fap v2.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 1600px;
+            height: 98vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .expert-avatar {
+            width: 40px;
+            height: 40px;
+            background: #fbbf24;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin: 0 auto 5px;
+        }
+
+        .expert-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .expert-title {
+            opacity: 0.9;
+            font-size: 12px;
+        }
+
+        .session-info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 15px;
+            background: #f8fafc;
+            min-height: 0;
+            font-size: 13px;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 0 10px;
+        }
+
+        .message.user .message-avatar {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .message.assistant .message-avatar {
+            background: #fbbf24;
+            color: #1f2937;
+        }
+
+        .message-content {
+            max-width: 70%;
+            background: white;
+            border-radius: 18px;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            line-height: 1.5;
+        }
+
+        .message.user .message-content {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .diagnostic-card {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 2px solid #0ea5e9;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 8px 0;
+            font-size: 13px;
+        }
+
+        .diagnostic-card h3, .diagnostic-card h4 {
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .diagnostic-card p, .diagnostic-card ul {
+            font-size: 12px;
+            margin: 4px 0;
+        }
+
+        .diagnostic-card ul {
+            padding-left: 15px;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-indicator {
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #10b981;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .cta-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .cta-button {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .cta-button:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        .cta-button.primary {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        .cta-button.secondary {
+            background: #6b7280;
+            color: white;
+            border-color: #6b7280;
+        }
+
+        .cta-button.urgent {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+            animation: pulse 2s infinite;
+        }
+
+        .cta-button.professional {
+            background: #8b5cf6;
+            color: white;
+            border-color: #8b5cf6;
+        }
+
+        .cta-button.prevention {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .cta-button.subscription {
+            background: #f59e0b;
+            color: white;
+            border-color: #f59e0b;
+        }
+
+        .cta-button.success {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+
+        .cta-button.info {
+            background: #06b6d4;
+            color: white;
+            border-color: #06b6d4;
+        }
+
+        .cta-button.warning {
+            background: #f97316;
+            color: white;
+            border-color: #f97316;
+        }
+
+        .cta-button.alternative {
+            background: #64748b;
+            color: white;
+            border-color: #64748b;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .workflow-card {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 6px 0;
+            border-left: 3px solid #10b981;
+            font-size: 12px;
+        }
+
+        .workflow-steps {
+            margin-top: 6px;
+        }
+
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            padding: 4px 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 12px;
+        }
+
+        .step-number {
+            width: 20px;
+            height: 20px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .chat-input-container {
+            padding: 10px 15px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+
+        .current-question {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 2px solid #0ea5e9;
+            border-radius: 10px;
+            padding: 8px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 12px;
+        }
+
+        .current-question .question-label {
+            color: #0369a1;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .chat-input {
+            width: 100%;
+            min-height: 40px;
+            border: 2px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 13px;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s ease;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            border-color: #3b82f6;
+        }
+
+        .input-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .send-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .send-button:hover {
+            background: #2563eb;
+        }
+
+        .send-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            display: none;
+            color: #6b7280;
+            font-style: italic;
+            padding: 10px 0;
+        }
+
+        .error-message {
+            background: #fecaca;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .success-message {
+            background: #bbf7d0;
+            border: 2px solid #10b981;
+            color: #065f46;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .question-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .option-button {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        .option-button:hover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+                max-width: 100%;
+            }
+            
+            .message-content {
+                max-width: 92%;
+                font-size: 12px;
+            }
+            
+            .question-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 1400px) {
+            .chat-container {
+                max-width: 1800px;
+            }
+        }
+
+        @media (min-width: 1900px) {
+            .chat-container {
+                max-width: 2000px;
+            }
+        }
+
+        .demo-mode-indicator {
+            background: #fbbf24;
+            color: #1f2937;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="demo-mode-indicator">Mode Démo</div>
+            <div class="session-info" id="sessionInfo">Session: Nouvelle</div>
+            <div class="expert-avatar">👨‍🔧</div>
+            <div class="expert-name">Julien</div>
+            <div class="expert-title">Expert FAP Re-Fap v2.0</div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message assistant">
+                <div class="message-avatar">J</div>
+                <div class="message-content">
+                    <div class="diagnostic-card">
+                        <h3>🔧 Bienvenue chez FAP Re-Fap Expert v2.0</h3>
+                        <p>Je suis votre assistant intelligent pour diagnostiquer les problèmes de FAP (Filtre à Particules) avec précision.</p>
+                        
+                        <div class="progress-indicator">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span>Diagnostic en cours</span>
+                                <span id="progressText">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        
+                        <p><strong>💡 Comment ça marche :</strong></p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>🔍 Je collecte vos symptômes intelligemment</li>
+                            <li>📊 J'analyse avec un moteur de scoring avancé</li>
+                            <li>🎯 Je propose les solutions les plus efficaces</li>
+                            <li>📈 J'apprends de chaque diagnostic pour m'améliorer</li>
+                        </ul>
+                        
+                        <div class="cta-buttons">
+                            <button class="cta-button primary" id="quickStartBtn">
+                                🚀 Diagnostic rapide
+                            </button>
+                            <button class="cta-button" id="detailedStartBtn">
+                                🔬 Analyse complète
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            Julien analyse votre message...
+        </div>
+
+        <div class="chat-input-container">
+            <div class="current-question" id="currentQuestion" style="display: none;">
+                <div class="question-label">Question en cours :</div>
+                <div id="currentQuestionText"></div>
+            </div>
+            
+            <textarea 
+                class="chat-input" 
+                id="messageInput" 
+                placeholder="Décrivez votre problème FAP (voyants, perte puissance, fumée, codes erreur...)"
+                rows="2"
+            ></textarea>
+            <div class="input-actions">
+                <div style="display: flex; gap: 10px;">
+                    <button class="cta-button" id="helpBtn">❓ Aide</button>
+                    <button class="cta-button" id="resetBtn">🔄 Reset</button>
+                </div>
+                <button class="send-button" id="sendButton">
+                    Envoyer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Configuration Supabase
+        const SUPABASE_URL = 'https://ipoxyhgfnzcggohugzzh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlwb3h5aGdmbnpjZ2dvaHVnenpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyMDU2OTksImV4cCI6MjA2OTc4MTY5OX0.PmS4a7jWFEGoUcxJiPSuNAByNAclW8vSz14UsgOANq0';
+        
+        // Initialisation Supabase
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        class FAPExpertChat {
+            constructor() {
+                this.sessionId = null;
+                this.currentState = 'initial';
+                this.messageHistory = [];
+                this.currentProgress = 0;
+                this.awaitingResponse = false;
+                this.useDatabase = true; // Flag pour activer/désactiver la DB
+                
+                this.initializeEventListeners();
+                this.generateSessionId();
+                this.testDatabaseConnection();
+            }
+
+            async testDatabaseConnection() {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('chat_sessions')
+                        .select('count')
+                        .limit(1);
+                    
+                    if (error) throw error;
+                    console.log('✅ Connexion Supabase OK');
+                    this.useDatabase = true;
+                } catch (error) {
+                    console.error('❌ Erreur Supabase:', error);
+                    this.useDatabase = false;
+                    this.displayMessage('assistant', 
+                        "⚠️ Mode hors ligne activé. Les conversations ne seront pas sauvegardées.",
+                        { ctas: [{ type: 'warning', title: '🔄 Réessayer', action: 'retry_connection' }] }
+                    );
+                }
+            }
+
+            initializeEventListeners() {
+                const messageInput = document.getElementById('messageInput');
+                const sendButton = document.getElementById('sendButton');
+
+                // Enter pour envoyer (Shift+Enter pour nouvelle ligne)
+                if (messageInput) {
+                    messageInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            this.sendMessage();
+                        }
+                    });
+
+                    // Auto-resize du textarea
+                    messageInput.addEventListener('input', () => {
+                        messageInput.style.height = 'auto';
+                        messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+                    });
+                }
+
+                // Bouton envoyer
+                if (sendButton) {
+                    sendButton.addEventListener('click', () => {
+                        this.sendMessage();
+                    });
+                }
+            }
+
+            generateSessionId() {
+                this.sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                const sessionInfo = document.getElementById('sessionInfo');
+                if (sessionInfo) {
+                    sessionInfo.textContent = `Session: ${this.sessionId.split('_')[1]}`;
+                }
+                
+                // Créer la session dans Supabase si connecté
+                if (this.useDatabase) {
+                    this.createDatabaseSession();
+                }
+            }
+
+            async createDatabaseSession() {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('chat_sessions')
+                        .insert([{
+                            session_id: this.sessionId,
+                            created_at: new Date().toISOString(),
+                            user_agent: navigator.userAgent,
+                            status: 'active'
+                        }])
+                        .select();
+
+                    if (error) {
+                        console.error('Erreur création session:', error);
+                    } else {
+                        console.log('✅ Session créée dans Supabase');
+                    }
+                } catch (error) {
+                    console.error('Erreur Supabase:', error);
+                }
+            }
+
+            // FONCTION MODIFIÉE POUR UTILISER LA BASE DE DONNÉES
+            async sendMessage(message = null) {
+                const messageInput = document.getElementById('messageInput');
+                const userMessage = message || messageInput.value.trim();
+                
+                if (!userMessage || this.awaitingResponse) return;
+
+                // Désactiver l'interface pendant le traitement
+                this.setLoading(true);
+                
+                // Afficher le message utilisateur
+                this.displayMessage('user', userMessage);
+                
+                if (messageInput) {
+                    messageInput.value = '';
+                    messageInput.style.height = 'auto';
+                }
+
+                try {
+                    // Sauvegarder dans Supabase si connecté
+                    if (this.useDatabase) {
+                        const { data: messageData, error: messageError } = await supabaseClient
+                            .from('chat_messages')
+                            .insert([{
+                                session_id: this.sessionId,
+                                sender: 'user',
+                                content: userMessage,
+                                created_at: new Date().toISOString()
+                            }])
+                            .select();
+
+                        if (messageError) {
+                            console.error('Erreur sauvegarde message:', messageError);
+                        }
+                    }
+
+                    // NOUVELLE LOGIQUE : Chercher d'abord dans la base
+                    let response;
+                    if (this.useDatabase) {
+                        // Chercher des conversations similaires
+                        const historicalResponse = await this.searchSimilarConversations(userMessage);
+                        
+                        if (historicalResponse) {
+                            console.log('✅ Réponse trouvée dans l\'historique');
+                            response = historicalResponse;
+                        } else {
+                            console.log('🔄 Génération de réponse locale');
+                            response = await this.generateLocalResponse(userMessage);
+                        }
+                    } else {
+                        // Mode hors ligne
+                        response = await this.generateLocalResponse(userMessage);
+                    }
+                    
+                    // Sauvegarder la réponse dans Supabase
+                    if (this.useDatabase && response.response) {
+                        const { error: responseError } = await supabaseClient
+                            .from('chat_messages')
+                            .insert([{
+                                session_id: this.sessionId,
+                                sender: 'assistant',
+                                content: response.response,
+                                metadata: {
+                                    confidence: response.confidence,
+                                    top_causes: response.top_causes,
+                                    source: response.source || 'generated'
+                                },
+                                created_at: new Date().toISOString()
+                            }]);
+
+                        if (responseError) {
+                            console.error('Erreur sauvegarde réponse:', responseError);
+                        }
+                    }
+
+                    // Afficher la réponse
+                    this.handleResponse(response);
+                    
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    this.displayError('Une erreur est survenue. Mode hors ligne activé.');
+                    this.useDatabase = false;
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            // NOUVELLE FONCTION : Recherche dans l'historique améliorée
+            async searchSimilarConversations(userMessage) {
+                try {
+                    const lowerMessage = userMessage.toLowerCase();
+                    const keywords = this.extractKeywords(lowerMessage);
+                    
+                    console.log('🔍 Recherche avec mots-clés:', keywords);
+                    
+                    // Stratégie de recherche multiple
+                    let results = [];
+                    
+                    // 1. Recherche exacte d'abord
+                    const { data: exactMatches } = await supabaseClient
+                        .from('chat_messages')
+                        .select('*')
+                        .eq('sender', 'user')
+                        .ilike('content', `%${lowerMessage}%`)
+                        .limit(5);
+                    
+                    if (exactMatches && exactMatches.length > 0) {
+                        results = exactMatches;
+                        console.log(`✅ ${exactMatches.length} correspondances exactes trouvées`);
+                    }
+                    
+                    // 2. Si pas de résultats exacts, recherche par mots-clés
+                    if (results.length === 0 && keywords.length > 0) {
+                        for (const keyword of keywords) {
+                            const { data: keywordMatches } = await supabaseClient
+                                .from('chat_messages')
+                                .select('*')
+                                .eq('sender', 'user')
+                                .ilike('content', `%${keyword}%`)
+                                .limit(10);
+                            
+                            if (keywordMatches) {
+                                results = [...results, ...keywordMatches];
+                            }
+                        }
+                        
+                        // Dédupliquer les résultats
+                        results = Array.from(new Map(results.map(item => [item.id, item])).values());
+                        console.log(`✅ ${results.length} correspondances par mots-clés`);
+                    }
+                    
+                    // 3. Recherche par métadonnées si disponibles
+                    if (results.length === 0) {
+                        // Extraire marque/modèle si mentionné
+                        const vehicleInfo = this.extractVehicleInfo(lowerMessage);
+                        if (vehicleInfo.make || vehicleInfo.model) {
+                            const { data: metadataMatches } = await supabaseClient
+                                .from('chat_messages')
+                                .select('*')
+                                .eq('sender', 'assistant')
+                                .or(`metadata->vehicle.ilike.%${vehicleInfo.make}%,metadata->vehicle.ilike.%${vehicleInfo.model}%`)
+                                .limit(10);
+                            
+                            if (metadataMatches && metadataMatches.length > 0) {
+                                // Récupérer les questions associées
+                                for (const match of metadataMatches) {
+                                    const { data: userMsg } = await supabaseClient
+                                        .from('chat_messages')
+                                        .select('*')
+                                        .eq('session_id', match.session_id)
+                                        .eq('sender', 'user')
+                                        .single();
+                                    
+                                    if (userMsg) {
+                                        results.push(userMsg);
+                                    }
+                                }
+                                console.log(`✅ ${results.length} correspondances par véhicule`);
+                            }
+                        }
+                    }
+                    
+                    if (results.length === 0) {
+                        console.log('❌ Aucune correspondance trouvée');
+                        return null;
+                    }
+                    
+                    // Calculer la similarité et trouver la meilleure correspondance
+                    let bestMatch = null;
+                    let bestScore = 0;
+                    
+                    for (const msg of results) {
+                        const score = this.calculateSimilarity(lowerMessage, msg.content.toLowerCase());
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestMatch = msg;
+                        }
+                    }
+                    
+                    // Seuil de similarité plus bas pour accepter plus de résultats
+                    if (!bestMatch || bestScore < 0.3) {
+                        return null;
+                    }
+                    
+                    console.log(`✅ Meilleure correspondance (score: ${bestScore.toFixed(2)}):`, bestMatch.content);
+                    
+                    // Récupérer la réponse associée
+                    const { data: assistantResponse } = await supabaseClient
+                        .from('chat_messages')
+                        .select('*')
+                        .eq('session_id', bestMatch.session_id)
+                        .eq('sender', 'assistant')
+                        .order('created_at', { ascending: true })
+                        .limit(1);
+                    
+                    if (!assistantResponse || assistantResponse.length === 0) {
+                        return null;
+                    }
+                    
+                    // Adapter la réponse avec plus de contexte
+                    const response = assistantResponse[0];
+                    return {
+                        success: true,
+                        response: this.adaptResponse(response.content, bestScore),
+                        confidence: Math.min(bestScore + 0.2, 0.95),
+                        source: 'database',
+                        original_question: bestMatch.content,
+                        similarity_score: bestScore,
+                        needs_clarification: bestScore < 0.5, // Demander des précisions si score faible
+                        ...response.metadata
+                    };
+                    
+                } catch (error) {
+                    console.error('Erreur recherche:', error);
+                    return null;
+                }
+            }
+
+            // Extraire les informations de véhicule
+            extractVehicleInfo(text) {
+                const vehiclePatterns = {
+                    makes: ['audi', 'bmw', 'mercedes', 'volkswagen', 'vw', 'peugeot', 'renault', 'citroen', 'ford', 'opel', 'nissan', 'toyota'],
+                    models: ['a3', 'a4', 'a6', 'q7', 'q5', '320d', '520d', 'x3', 'x5', 'c220', 'e220', 'golf', 'passat', 'tiguan', '308', '3008', '508', 'megane', 'scenic', 'c4', 'c5', 'focus', 'mondeo']
+                };
+                
+                let info = { make: null, model: null, engine: null };
+                
+                // Rechercher la marque
+                for (const make of vehiclePatterns.makes) {
+                    if (text.includes(make)) {
+                        info.make = make.toUpperCase();
+                        break;
+                    }
+                }
+                
+                // Rechercher le modèle
+                for (const model of vehiclePatterns.models) {
+                    if (text.includes(model)) {
+                        info.model = model.toUpperCase();
+                        break;
+                    }
+                }
+                
+                // Rechercher le moteur
+                const engineMatch = text.match(/\d+\.?\d*\s*(tdi|hdi|dci|cdi|tdci|bluehdi|bluetec)/i);
+                if (engineMatch) {
+                    info.engine = engineMatch[0].toUpperCase();
+                }
+                
+                return info;
+            }
+
+            // Extraire les mots-clés importants (version améliorée)
+            extractKeywords(text) {
+                const keywords = [];
+                
+                // Mots-clés FAP spécifiques étendus
+                const fapKeywords = [
+                    'fumée', 'noire', 'blanche', 'bleue', 'fumee',
+                    'voyant', 'orange', 'rouge', 'moteur', 'témoin', 'temoin',
+                    'p2002', 'p2003', 'p242f', 'p2452', 'p244b', 'code', 'erreur',
+                    'perte', 'puissance', 'régénération', 'regeneration',
+                    'encrassé', 'bouché', 'colmaté', 'encrasse', 'bouche', 'colmate',
+                    'nettoyage', 'additif', 'turbo', 'nettoyer',
+                    'consommation', 'ville', 'autoroute', 'surconsommation',
+                    'garantie', 'prix', 'coût', 'cout', 'tarif', 'devis',
+                    'diagnostic', 'vidange', 'huile', 'adblue',
+                    'mode', 'dégradé', 'degrade', 'urgence',
+                    'démarrage', 'demarrage', 'démarre', 'demarre'
+                ];
+                
+                // Extraire les mots-clés présents
+                for (const keyword of fapKeywords) {
+                    if (text.includes(keyword)) {
+                        keywords.push(keyword);
+                    }
+                }
+                
+                // Ajouter les codes d'erreur
+                const errorCodes = text.match(/p\d{4}/gi);
+                if (errorCodes) {
+                    keywords.push(...errorCodes.map(code => code.toLowerCase()));
+                }
+                
+                // Ajouter les marques de véhicules
+                const vehicleInfo = this.extractVehicleInfo(text);
+                if (vehicleInfo.make) keywords.push(vehicleInfo.make.toLowerCase());
+                if (vehicleInfo.model) keywords.push(vehicleInfo.model.toLowerCase());
+                
+                return [...new Set(keywords)]; // Supprimer les doublons
+            }
+
+            // Calculer la similarité entre deux textes (version améliorée)
+            calculateSimilarity(text1, text2) {
+                // Normaliser les textes
+                const normalize = (text) => text
+                    .toLowerCase()
+                    .replace(/[^\w\s]/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                
+                const norm1 = normalize(text1);
+                const norm2 = normalize(text2);
+                
+                // Si textes identiques
+                if (norm1 === norm2) return 1;
+                
+                // Méthode 1 : Mots communs
+                const words1 = norm1.split(' ');
+                const words2 = norm2.split(' ');
+                const commonWords = words1.filter(word => words2.includes(word));
+                const wordScore = commonWords.length / Math.max(words1.length, words2.length);
+                
+                // Méthode 2 : Mots-clés importants
+                const keywords1 = this.extractKeywords(text1);
+                const keywords2 = this.extractKeywords(text2);
+                const commonKeywords = keywords1.filter(k => keywords2.includes(k));
+                const keywordScore = keywords1.length > 0 ? commonKeywords.length / keywords1.length : 0;
+                
+                // Méthode 3 : Distance de Levenshtein normalisée (simplifiée)
+                const maxLength = Math.max(norm1.length, norm2.length);
+                let distance = 0;
+                for (let i = 0; i < maxLength; i++) {
+                    if (norm1[i] !== norm2[i]) distance++;
+                }
+                const distanceScore = 1 - (distance / maxLength);
+                
+                // Score final pondéré
+                const finalScore = (wordScore * 0.3) + (keywordScore * 0.5) + (distanceScore * 0.2);
+                
+                return Math.min(finalScore, 1);
+            }
+
+            // Adapter une réponse trouvée dans la base (version conversationnelle)
+            adaptResponse(originalResponse, similarity) {
+                // Nettoyer la réponse de certains patterns
+                let cleanResponse = originalResponse
+                    .replace(/Sur \w+ \d+\.\d+ \w+,/g, '') // Enlever "Sur A4 2.0 TDI,"
+                    .trim();
+                
+                if (similarity > 0.8) {
+                    // Très similaire : utiliser avec confiance
+                    return cleanResponse;
+                } else if (similarity > 0.5) {
+                    // Similaire : ajouter contexte
+                    return `D'après mon expérience avec des cas similaires :\n\n${cleanResponse}\n\n💡 *Votre situation peut varier légèrement. N'hésitez pas à me donner plus de détails si besoin.*`;
+                } else {
+                    // Peu similaire : demander clarification
+                    return `Je vais vous aider en me basant sur des situations proches :\n\n${cleanResponse}\n\n❓ **Pour être plus précis**, pouvez-vous me dire :\n• Quel modèle de véhicule exactement ?\n• Quels symptômes observez-vous ?\n• Depuis combien de temps ?`;
+                }
+            }
+
+            // Nouvelle fonction pour générer les réponses localement
+            async generateLocalResponse(userMessage) {
+                // Simuler un délai de traitement
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                const lowerMessage = userMessage.toLowerCase();
+                let response = {
+                    success: true,
+                    response: '',
+                    confidence: 0.5,
+                    top_causes: [],
+                    ctas: [],
+                    session_state: 'active',
+                    current_progress: 0
+                };
+
+                // Logique de réponse (identique à avant)
+                if (lowerMessage.includes('diagnostic rapide') || lowerMessage.includes('commencer')) {
+                    response.response = "Parfait ! Je vais diagnostiquer votre problème de FAP rapidement.\n\n**Question 1:** Observez-vous de la fumée à l'échappement ?";
+                    response.ctas = [
+                        { type: 'primary', title: '💨 Fumée noire', action: 'black_smoke' },
+                        { type: 'primary', title: '☁️ Fumée blanche', action: 'white_smoke' },
+                        { type: 'primary', title: '🔵 Fumée bleue', action: 'blue_smoke' },
+                        { type: 'secondary', title: '✅ Pas de fumée', action: 'no_smoke' }
+                    ];
+                    response.current_progress = 20;
+                }
+                else if (lowerMessage.includes('fumée noire') || lowerMessage.includes('fumee noire')) {
+                    response.response = "La fumée noire indique généralement un **FAP encrassé**. C'est le problème le plus courant sur les véhicules diesel.\n\n**Question 2:** Avez-vous également une perte de puissance ?";
+                    response.confidence = 0.75;
+                    response.top_causes = [
+                        { name: 'FAP encrassé', score: 0.8, description: 'Accumulation de suie dans le filtre' },
+                        { name: 'Régénération incomplète', score: 0.15, description: 'Cycles de régénération interrompus' }
+                    ];
+                    response.ctas = [
+                        { type: 'primary', title: '✅ Oui, perte de puissance', action: 'confirm_power_loss' },
+                        { type: 'primary', title: '❌ Non, pas de perte', action: 'no_power_loss' }
+                    ];
+                    response.current_progress = 50;
+                }
+                else if (lowerMessage.includes('oui') || lowerMessage.includes('perte de puissance')) {
+                    response.response = "⚠️ **Diagnostic confirmé : FAP très encrassé**\n\nLa combinaison fumée noire + perte de puissance nécessite une intervention rapide pour éviter des dommages au moteur.\n\n**Estimation des coûts :**\n• Nettoyage professionnel : 150-250€\n• Remplacement FAP : 800-1500€";
+                    response.confidence = 0.9;
+                    response.top_causes = [
+                        { name: 'FAP très encrassé', score: 0.9, description: 'Nécessite intervention urgente' },
+                        { name: 'Risque turbo', score: 0.1, description: 'Contre-pression dangereuse' }
+                    ];
+                    response.ctas = [
+                        { type: 'urgent', title: '🚨 Nettoyage urgent FAP', action: 'book_cleaning' },
+                        { type: 'primary', title: '🛣️ Essayer régénération autoroute', action: 'highway_regeneration' },
+                        { type: 'professional', title: '👨‍🔧 Contacter un pro', action: 'contact_expert' }
+                    ];
+                    response.recommended_workflow = {
+                        name: 'Nettoyage FAP professionnel',
+                        category: 'professional',
+                        success_probability: 0.85,
+                        steps: [
+                            { step: 1, title: 'Diagnostic complet', instructions: 'Vérification codes erreur et état FAP', duration: '30 min' },
+                            { step: 2, title: 'Nettoyage chimique', instructions: 'Application produit nettoyant Re-Fap', duration: '2h' },
+                            { step: 3, title: 'Test route', instructions: 'Vérification après nettoyage', duration: '30 min' }
+                        ]
+                    };
+                    response.current_progress = 80;
+                }
+                else if (lowerMessage.includes('voyant') || lowerMessage.includes('témoin')) {
+                    response.response = "Un voyant allumé est un signal d'alerte important.\n\n**De quelle couleur est le voyant ?**";
+                    response.ctas = [
+                        { type: 'warning', title: '🟠 Voyant orange', action: 'orange_light' },
+                        { type: 'urgent', title: '🔴 Voyant rouge', action: 'red_light' },
+                        { type: 'info', title: '🟡 Voyant jaune', action: 'yellow_light' }
+                    ];
+                    response.current_progress = 30;
+                }
+                else if (lowerMessage.includes('code') || lowerMessage.includes('p2002') || lowerMessage.includes('p2003')) {
+                    response.response = "Les codes P2002/P2003 confirment un problème FAP.\n\n**Analyse des codes :**\n• P2002 : FAP encrassé banque 1\n• P2003 : FAP encrassé banque 2\n\nCes codes nécessitent une action rapide.";
+                    response.confidence = 0.95;
+                    response.top_causes = [
+                        { name: 'FAP obstrué confirmé', score: 0.95, description: 'Diagnostic électronique confirmé' }
+                    ];
+                    response.ctas = [
+                        { type: 'urgent', title: '🔧 Solutions immédiates', action: 'show_solutions' },
+                        { type: 'info', title: '📊 Voir autres codes', action: 'other_codes' }
+                    ];
+                    response.current_progress = 70;
+                }
+                else if (lowerMessage.includes('aide') || lowerMessage.includes('help')) {
+                    response.response = "**💡 Comment utiliser l'expert FAP :**\n\n• Décrivez vos symptômes précisément\n• Mentionnez la couleur de fumée\n• Indiquez les voyants allumés\n• Précisez les codes d'erreur\n\n**Exemples :**\n• 'Fumée noire + perte de puissance'\n• 'Voyant moteur orange allumé'\n• 'Code erreur P2002'";
+                    response.ctas = [
+                        { type: 'primary', title: '🚀 Commencer diagnostic', action: 'quick_diagnosis' }
+                    ];
+                }
+                else {
+                    response.response = "Je suis Julien, votre expert FAP. Pour un diagnostic précis, décrivez-moi vos symptômes :\n\n• Fumée à l'échappement ? (couleur)\n• Voyants allumés ?\n• Perte de puissance ?\n• Codes d'erreur ?\n• Type de conduite (ville/route) ?";
+                    response.ctas = [
+                        { type: 'primary', title: '🚀 Diagnostic rapide', action: 'quick_diagnosis' },
+                        { type: 'secondary', title: '📋 Analyse complète', action: 'full_analysis' }
+                    ];
+                }
+
+                return response;
+            }
+
+            handleResponse(data) {
+                if (!data.success) {
+                    this.displayError(data.error || 'Erreur inconnue');
+                    return;
+                }
+
+                // Mettre à jour la progression
+                if (data.current_progress !== undefined) {
+                    this.updateProgress(data.current_progress);
+                }
+
+                // Mettre à jour la question courante si présente
+                this.updateCurrentQuestion(data);
+
+                // Afficher la réponse principale
+                this.displayMessage('assistant', data.response, {
+                    confidence: data.confidence,
+                    top_causes: data.top_causes,
+                    ctas: data.ctas,
+                    question_type: data.question_type,
+                    options: data.options,
+                    requires_confirmation: data.requires_confirmation,
+                    recommended_workflow: data.recommended_workflow,
+                    post_diagnostic_active: data.post_diagnostic_active,
+                    external_link: data.external_link,
+                    form_active: data.form_active,
+                    garages_found: data.garages_found
+                });
+
+                // Mettre à jour l'état
+                this.currentState = data.session_state || this.currentState;
+            }
+
+            displayMessage(sender, content, metadata = {}) {
+                const messagesContainer = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar';
+                avatar.textContent = sender === 'user' ? 'U' : 'J';
+
+                const messageContent = document.createElement('div');
+                messageContent.className = 'message-content';
+
+                if (sender === 'assistant') {
+                    messageContent.innerHTML = this.formatAssistantMessage(content, metadata);
+                } else {
+                    messageContent.innerHTML = this.formatMarkdown(content || '');
+                }
+
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(messageContent);
+                messagesContainer.appendChild(messageDiv);
+
+                // Scroll automatique
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                // Stocker dans l'historique
+                this.messageHistory.push({ sender, content, metadata, timestamp: new Date() });
+            }
+
+            formatAssistantMessage(content, metadata) {
+                // Sécurité : vérifier que content existe
+                if (!content) content = "Réponse vide reçue du serveur.";
+                
+                let html = `<div>${this.formatMarkdown(content)}</div>`;
+
+                // Affichage de la confiance si présente
+                if (metadata.confidence !== undefined) {
+                    const confidencePercent = Math.round(metadata.confidence * 100);
+                    html += `
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${confidencePercent}%"></div>
+                        </div>
+                        <small>Confiance du diagnostic: ${confidencePercent}%</small>
+                    `;
+                    
+                    // Indicateur de source si disponible
+                    if (metadata.source === 'database') {
+                        html += `<small style="color: #10b981; margin-left: 10px;">📚 Basé sur l'historique</small>`;
+                    }
+                    
+                    // Afficher la similarité si disponible
+                    if (metadata.similarity_score) {
+                        const simPercent = Math.round(metadata.similarity_score * 100);
+                        html += `<br><small style="color: #6b7280;">Question similaire trouvée (${simPercent}% de correspondance)</small>`;
+                    }
+                }
+
+                // Affichage des causes principales
+                if (metadata.top_causes && metadata.top_causes.length > 0) {
+                    html += '<div class="diagnostic-card">';
+                    html += '<h4>🎯 Causes les plus probables:</h4>';
+                    metadata.top_causes.forEach((cause, index) => {
+                        const percentage = Math.round((cause.score || 0) * 100);
+                        html += `
+                            <div style="margin: 10px 0; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px;">
+                                <strong>${index + 1}. ${cause.name || 'Cause inconnue'}</strong> (${percentage}%)
+                                <br><small>${cause.description || ''}</small>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                // Workflow recommandé
+                if (metadata.recommended_workflow) {
+                    html += this.formatWorkflow(metadata.recommended_workflow);
+                }
+
+                // Options de questions à choix multiples
+                if (metadata.options && metadata.question_type === 'multiple_choice') {
+                    html += '<div class="question-options">';
+                    metadata.options.forEach(option => {
+                        html += `
+                            <button class="option-button" onclick="window.chat.selectOption('${option.id}', '${this.escapeHtml(option.label)}')">
+                                ${option.label}
+                            </button>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                // Boutons CTA avec gestion des CTA enrichis
+                if (metadata.ctas && metadata.ctas.length > 0) {
+                    html += '<div class="cta-buttons">';
+                    metadata.ctas.forEach(cta => {
+                        const buttonClass = this.getCTAButtonClass(cta.type);
+                        
+                        // Description enrichie si disponible
+                        const description = cta.description ? `<small style="display: block; margin-top: 2px; opacity: 0.9;">${cta.description}</small>` : '';
+                        const successRate = cta.success_rate && !cta.description ? `<small style="display: block; margin-top: 2px; opacity: 0.9;">(${cta.success_rate}% succès)</small>` : '';
+                        
+                        const ctaDataStr = JSON.stringify(cta).replace(/"/g, '&quot;');
+                        
+                        html += `
+                            <button class="cta-button ${buttonClass}" onclick="window.chat.executeCTA('${cta.action}', '${this.escapeHtml(cta.title)}', JSON.parse('${ctaDataStr}'))">
+                                <span>
+                                    ${cta.title}
+                                    ${description || successRate}
+                                </span>
+                            </button>
+                        `;
+                    });
+                    html += '</div>';
+                    
+                    // Ajouter info sur l'arbre de décision si actif
+                    if (metadata.decision_tree_active) {
+                        html += '<div style="margin-top: 8px; font-size: 11px; color: #6b7280; font-style: italic;">💡 Solutions personnalisées selon votre situation</div>';
+                    }
+                    
+                    // Info post-diagnostic si actif
+                    if (metadata.post_diagnostic_active) {
+                        html += '<div style="margin-top: 8px; font-size: 11px; color: #6b7280; font-style: italic;">🎯 Je personnalise les solutions selon votre profil</div>';
+                    }
+                }
+
+                // Lien externe si présent
+                if (metadata.external_link) {
+                    html += `<div style="margin-top: 10px; text-align: center;">
+                        <a href="${metadata.external_link}" target="_blank" style="color: #3b82f6; text-decoration: underline;">
+                            🔗 Ouvrir le site dans un nouvel onglet
+                        </a>
+                    </div>`;
+                }
+
+                // Indicateur de formulaire actif
+                if (metadata.form_active) {
+                    html += '<div style="margin-top: 8px; font-size: 11px; color: #10b981; font-style: italic;">📝 Entrez les informations demandées ci-dessous</div>';
+                }
+
+                // Info garages trouvés
+                if (metadata.garages_found) {
+                    html += `<div style="margin-top: 8px; font-size: 11px; color: #10b981; font-style: italic;">✅ ${metadata.garages_found} garages partenaires trouvés</div>`;
+                }
+
+                return html;
+            }
+
+            formatWorkflow(workflow) {
+                if (!workflow) return '';
+                
+                let html = `
+                    <div class="workflow-card">
+                        <h4>🔧 ${workflow.name || 'Workflow'}</h4>
+                        <p><strong>Catégorie:</strong> ${this.formatCategory(workflow.category)}</p>
+                        <p><strong>Taux de succès:</strong> ${Math.round((workflow.success_probability || 0.5) * 100)}%</p>
+                `;
+
+                if (workflow.steps && workflow.steps.length > 0) {
+                    html += '<div class="workflow-steps">';
+                    workflow.steps.forEach(step => {
+                        html += `
+                            <div class="workflow-step">
+                                <div class="step-number">${step.step}</div>
+                                <div>
+                                    <strong>${step.title || 'Étape'}</strong>
+                                    <br><small>${step.instructions || ''}</small>
+                                    ${step.duration ? `<br><em>Durée: ${step.duration}</em>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                html += '</div>';
+                return html;
+            }
+
+            formatCategory(category) {
+                const categories = {
+                    'self_service': '🛠️ Auto-service',
+                    'professional': '👨‍🔧 Professionnel',
+                    'urgent': '🚨 Urgent',
+                    'diagnostic': '🔍 Diagnostic'
+                };
+                return categories[category] || category;
+            }
+
+            getCTAButtonClass(type) {
+                const classes = {
+                    'primary': 'primary',
+                    'secondary': 'secondary',
+                    'confirmation': 'primary',
+                    'urgent': 'urgent',
+                    'emergency': 'urgent',
+                    'answer': 'primary',
+                    'professional': 'professional',
+                    'prevention': 'prevention',
+                    'subscription': 'subscription',
+                    'success': 'success',
+                    'info': 'info',
+                    'warning': 'warning',
+                    'alternative': 'alternative'
+                };
+                return classes[type] || '';
+            }
+
+            formatMarkdown(text) {
+                // Sécurité : vérifier que text existe et est une chaîne
+                if (!text || typeof text !== 'string') {
+                    return '';
+                }
+                
+                return text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\n/g, '<br>')
+                    .replace(/^• /gm, '• '); // Préserver les puces
+            }
+
+            escapeHtml(text) {
+                if (!text) return '';
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, m => map[m]);
+            }
+
+            selectOption(optionId, optionLabel) {
+                this.sendMessage(optionLabel);
+            }
+
+            async executeCTA(action, title, ctaData) {
+                console.log(`Exécution CTA: ${action} - ${title}`, ctaData);
+                
+                // Gestion des actions avec des réponses spécifiques
+                switch (action) {
+                    case 'black_smoke':
+                        this.sendMessage('Fumée noire');
+                        break;
+                    
+                    case 'white_smoke':
+                        this.sendMessage('Fumée blanche');
+                        break;
+                    
+                    case 'blue_smoke':
+                        this.sendMessage('Fumée bleue');
+                        break;
+                    
+                    case 'no_smoke':
+                        this.sendMessage('Pas de fumée');
+                        break;
+                    
+                    case 'confirm_power_loss':
+                        this.sendMessage('Oui, j\'ai une perte de puissance');
+                        break;
+                    
+                    case 'no_power_loss':
+                        this.sendMessage('Non, pas de perte de puissance');
+                        break;
+                    
+                    case 'orange_light':
+                        this.displayMessage('assistant', "🟠 **Voyant orange = Alerte modérée**\n\nLe voyant orange indique un problème qui nécessite une attention dans les prochains jours.\n\n**Causes possibles :**\n• FAP en cours d'encrassement (60%)\n• Régénération nécessaire (30%)\n• Capteur défaillant (10%)\n\n**Que faire maintenant ?**", {
+                            confidence: 0.7,
+                            ctas: [
+                                { type: 'primary', title: '🛣️ Faire une régénération', action: 'highway_regeneration' },
+                                { type: 'info', title: '🔍 Diagnostic complet', action: 'full_diagnosis' }
+                            ],
+                            current_progress: 40
+                        });
+                        break;
+                    
+                    case 'red_light':
+                        this.displayMessage('assistant', "🔴 **VOYANT ROUGE = URGENCE !**\n\n⚠️ **Arrêtez le véhicule dès que possible !**\n\nUn voyant rouge indique un risque de dommages importants au moteur.\n\n**Actions immédiates :**\n• Garez-vous en sécurité\n• Coupez le moteur\n• Ne redémarrez pas", {
+                            confidence: 0.95,
+                            ctas: [
+                                { type: 'urgent', title: '📞 Appel dépannage', action: 'emergency_call' },
+                                { type: 'urgent', title: '🚨 Voir garages urgents', action: 'emergency_garages' }
+                            ],
+                            current_progress: 60
+                        });
+                        break;
+                    
+                    case 'yellow_light':
+                        this.displayMessage('assistant', "🟡 **Voyant jaune = Attention requise**\n\nLe voyant jaune est souvent lié à l'AdBlue ou à un début d'encrassement FAP.\n\n**Vérifications :**\n• Niveau AdBlue\n• Dernière régénération FAP\n• Kilométrage depuis dernier entretien", {
+                            confidence: 0.65,
+                            ctas: [
+                                { type: 'primary', title: '💧 Vérifier AdBlue', action: 'check_adblue' },
+                                { type: 'secondary', title: '🔧 Continuer diagnostic', action: 'continue_diagnosis' }
+                            ],
+                            current_progress: 35
+                        });
+                        break;
+                    
+                    case 'book_cleaning':
+                        this.displayMessage('assistant', "🧽 **Nettoyage professionnel FAP**\n\nJe vous recommande un nettoyage professionnel avec le produit Re-Fap.\n\n**Avantages :**\n• Économie de 80% vs remplacement\n• Garantie 1 an\n• Résultat en 2-3h\n\n**Tarif moyen :** 150-250€\n\n📞 Contactez un garage partenaire Re-Fap près de chez vous.", {
+                            ctas: [
+                                { type: 'professional', title: '📍 Trouver un garage', action: 'find_garage' },
+                                { type: 'info', title: '📄 Devis gratuit', action: 'free_quote' }
+                            ]
+                        });
+                        break;
+                    
+                    case 'highway_regeneration':
+                        this.displayMessage('assistant', "🛣️ **Guide régénération autoroute**\n\n**Instructions :**\n1. Réservoir > 1/4 plein\n2. Moteur chaud\n3. Roulez 30-45 min à 90-110 km/h\n4. Régime moteur > 2500 tr/min\n\n⚠️ **Important :** Ne pas s'arrêter pendant le trajet !\n\n**Taux de succès :** 70% si FAP peu encrassé", {
+                            ctas: [
+                                { type: 'success', title: '✅ C\'est fait !', action: 'regeneration_done' },
+                                { type: 'warning', title: '❌ Ça n\'a pas marché', action: 'regeneration_failed' }
+                            ]
+                        });
+                        break;
+                    
+                    case 'contact_expert':
+                        this.showContactInfo();
+                        break;
+                    
+                    case 'quick_diagnosis':
+                        this.sendMessage('Je veux un diagnostic rapide');
+                        break;
+                    
+                    case 'full_analysis':
+                        this.sendMessage('Je veux une analyse complète');
+                        break;
+                    
+                    case 'show_solutions':
+                        this.displayMessage('assistant', "🔧 **Solutions pour codes P2002/P2003**\n\n**1. Solution économique (150-250€)**\n• Nettoyage chimique professionnel\n• Efficace dans 85% des cas\n• Garantie 1 an\n\n**2. Régénération forcée (50-100€)**\n• Par diagnostic électronique\n• Succès : 60%\n\n**3. Remplacement FAP (800-1500€)**\n• Solution définitive\n• Si nettoyage échoué", {
+                            ctas: [
+                                { type: 'prevention', title: '💰 Option économique', action: 'economic_solution' },
+                                { type: 'professional', title: '🔧 Solution définitive', action: 'definitive_solution' }
+                            ]
+                        });
+                        break;
+                    
+                    default:
+                        this.sendMessage(`Je choisis : ${title}`);
+                }
+            }
+
+            showContactInfo() {
+                this.displayMessage('assistant', `
+                    📞 **Contact Expert FAP Re-Fap**
+                    
+                    **Julien - Expert FAP Certifié**
+                    • 📱 Téléphone: 06 XX XX XX XX
+                    • 📧 Email: contact@re-fap.fr
+                    • 🏢 Atelier: Paris et région
+                    
+                    **Horaires:**
+                    • Lun-Ven: 8h-18h
+                    • Sam: 8h-12h
+                    
+                    💡 **Mentionnez le code "CHATBOT" pour -10%**
+                `);
+            }
+
+            showHelp() {
+                this.displayMessage('assistant', `
+                    ❓ **Guide d'utilisation FAP Expert v2.0**
+                    
+                    **Types de problèmes que je peux diagnostiquer:**
+                    • 🔶 Voyants allumés (moteur, FAP, AdBlue...)
+                    • ⚡ Perte de puissance
+                    • 💨 Fumée d'échappement
+                    • 🔢 Codes d'erreur OBD
+                    • 🚗 Problèmes liés à la conduite urbaine
+                    
+                    **Comment bien me décrire votre problème:**
+                    • Soyez précis sur les symptômes
+                    • Mentionnez les codes d'erreur si vous en avez
+                    • Décrivez votre type de conduite
+                    • Indiquez le kilométrage de votre véhicule
+                    
+                    **Exemples de messages efficaces:**
+                    • "Voyant FAP allumé + perte de puissance en ville"
+                    • "Code P2002 + fumée noire à l'accélération"
+                    • "Conduite urbaine uniquement, voyant moteur"
+                    
+                    💡 **Plus vous êtes précis, plus mon diagnostic sera exact !**
+                `);
+            }
+
+            updateProgress(percentage) {
+                this.currentProgress = percentage;
+                const progressFill = document.getElementById('progressFill');
+                const progressText = document.getElementById('progressText');
+                
+                if (progressFill) {
+                    progressFill.style.width = `${percentage}%`;
+                }
+                if (progressText) {
+                    progressText.textContent = `${percentage}%`;
+                }
+            }
+
+            updateCurrentQuestion(data) {
+                const currentQuestionDiv = document.getElementById('currentQuestion');
+                const currentQuestionText = document.getElementById('currentQuestionText');
+                
+                if (!currentQuestionDiv || !currentQuestionText) return;
+
+                // Si on a une question directe dans next_question
+                if (data.next_question && data.next_question.text) {
+                    currentQuestionText.textContent = data.next_question.text;
+                    currentQuestionDiv.style.display = 'block';
+                    
+                    // Mettre à jour le placeholder
+                    const messageInput = document.getElementById('messageInput');
+                    if (messageInput) {
+                        messageInput.placeholder = "Votre réponse...";
+                    }
+                } else if (data.question_type && data.options) {
+                    // Si on a une question avec options
+                    const questionMatch = data.response.match(/\*\*(.*?)\*\*/);
+                    const question = questionMatch ? questionMatch[1] : 'Question en cours...';
+                    
+                    currentQuestionText.textContent = question;
+                    currentQuestionDiv.style.display = 'block';
+                    
+                    const messageInput = document.getElementById('messageInput');
+                    if (messageInput) {
+                        messageInput.placeholder = "Votre réponse...";
+                    }
+                } else if (data.response.includes('j\'ai besoin de') || data.response.includes('Pour affiner le diagnostic')) {
+                    // Si la réponse indique qu'on collecte des infos
+                    currentQuestionText.textContent = "Répondez aux questions pour affiner le diagnostic";
+                    currentQuestionDiv.style.display = 'block';
+                    
+                    const messageInput = document.getElementById('messageInput');
+                    if (messageInput) {
+                        messageInput.placeholder = "Décrivez vos symptômes plus précisément...";
+                    }
+                } else if (data.form_active) {
+                    // Si on collecte des données utilisateur
+                    currentQuestionText.textContent = "Entrez les informations demandées";
+                    currentQuestionDiv.style.display = 'block';
+                    
+                    const messageInput = document.getElementById('messageInput');
+                    if (messageInput) {
+                        messageInput.placeholder = "Ex: AB-123-CD et 75015";
+                    }
+                } else {
+                    // Masquer la question si diagnostic terminé
+                    currentQuestionDiv.style.display = 'none';
+                    this.resetInputPlaceholder();
+                }
+            }
+
+            resetInputPlaceholder() {
+                const messageInput = document.getElementById('messageInput');
+                if (messageInput) {
+                    messageInput.placeholder = "Décrivez votre problème FAP (voyants, perte puissance, fumée, codes erreur...)";
+                }
+            }
+
+            setLoading(loading) {
+                this.awaitingResponse = loading;
+                const sendButton = document.getElementById('sendButton');
+                const typingIndicator = document.getElementById('typingIndicator');
+                
+                if (sendButton) {
+                    sendButton.disabled = loading;
+                    sendButton.textContent = loading ? 'Analyse...' : 'Envoyer';
+                }
+                
+                if (typingIndicator) {
+                    typingIndicator.style.display = loading ? 'block' : 'none';
+                }
+            }
+
+            displayError(message) {
+                const messagesContainer = document.getElementById('chatMessages');
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.innerHTML = `
+                    ⚠️ <strong>Erreur:</strong> ${message}
+                    <div style="margin-top: 10px;">
+                        <button class="cta-button" onclick="window.chat.retryLastMessage()">🔄 Réessayer</button>
+                    </div>
+                `;
+                messagesContainer.appendChild(errorDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            retryLastMessage() {
+                const lastUserMessage = this.messageHistory
+                    .slice()
+                    .reverse()
+                    .find(msg => msg.sender === 'user');
+                
+                if (lastUserMessage) {
+                    this.sendMessage(lastUserMessage.content);
+                }
+            }
+        }
+
+        // Instance globale
+        window.chat = new FAPExpertChat();
+
+        // Initialisation au chargement
+        window.addEventListener('load', () => {
+            const messageInput = document.getElementById('messageInput');
+            if (messageInput) {
+                messageInput.focus();
+            }
+
+            // Boutons d'action rapide
+            const quickStartBtn = document.getElementById('quickStartBtn');
+            if (quickStartBtn) {
+                quickStartBtn.addEventListener('click', () => {
+                    window.chat.sendMessage('Je veux un diagnostic rapide de mon problème FAP');
+                });
+            }
+
+            const detailedStartBtn = document.getElementById('detailedStartBtn');
+            if (detailedStartBtn) {
+                detailedStartBtn.addEventListener('click', () => {
+                    window.chat.sendMessage('Je veux une analyse complète et détaillée');
+                });
+            }
+
+            const helpBtn = document.getElementById('helpBtn');
+            if (helpBtn) {
+                helpBtn.addEventListener('click', () => {
+                    window.chat.showHelp();
+                });
+            }
+
+            const resetBtn = document.getElementById('resetBtn');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    if (confirm('Voulez-vous vraiment recommencer le diagnostic ?')) {
+                        const currentQuestionDiv = document.getElementById('currentQuestion');
+                        if (currentQuestionDiv) {
+                            currentQuestionDiv.style.display = 'none';
+                        }
+                        location.reload();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
